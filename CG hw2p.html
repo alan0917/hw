@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 1%;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+body {
+  overflow: hidden;
+}
+
+</style>
+</head>
+
+<body> 
+<div id="info">
+  HOMEWORK 2P
+    <br/>
+      <button id="viewpoint" style="width:20%">viewpoint</button>
+      <button id="run" style="width:20%">run / dance </button>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+<script>
+var scene, renderer, camera, controls, light;		//系統設定;
+var danboard_color;		//阿楞的顏色材質;
+var head, torso, handleft, handright, footleft, footright;
+var overall, shoulderleft, shoulderright; 
+var clock = new THREE.Clock();
+var period = 1.8;
+var viewpoint = false, pass = false, turn = true;
+var all;
+
+var angle = 0;
+
+var pose1 = {
+		head_X: 0,
+    head_Y: 0,
+    head_Z: 0,
+    lefthand_X: 0,
+    lefthand_Z: 0,
+    righthand_X: 0,
+    righthand_Z: 0,
+    leftfoot_X:0,
+    leftfoot_Z:0,
+    rightfoot_X:0,
+    rightfoot_Z:0,
+    overall_X:0,
+    overall_Z:0
+};
+
+var pose2 = {
+    head_X: 0.2,
+    head_Y: 0,
+    head_Z: 0,
+    lefthand_X: -1.5,
+    lefthand_Z: 0,
+    righthand_X: -1.5,
+    righthand_Z: 0,
+    leftfoot_X: -0.10186244927687027,
+    leftfoot_Z: -0.06934762251586735,
+    rightfoot_X: 0.060711684528144794,
+    rightfoot_Z: -0.6220996774529186,
+    overall_X:5,
+    overall_Z:0
+};
+
+
+var pose3 = {
+    head_X:-0.2,
+    head_Y:0,
+    head_Z:0,
+    lefthand_X :0,
+    lefthand_Z :-Math.PI/2,
+    righthand_X: 0,
+    righthand_Z: Math.PI/2,
+    leftfoot_X:-0.002,
+    leftfoot_Z:0.6220996774529186,
+    rightfoot_X:-0.002,
+    rightfoot_Z:0,
+    overall_X:-5,
+    overall_Z:0
+};
+
+var pose4 = {
+    head_X: 0,
+    head_Y: 0,
+    head_Z:  Math.PI/9,
+    lefthand_X: -1.5,
+    lefthand_Z: 0,
+    righthand_X: -1.5,
+    righthand_Z: 0,
+    leftfoot_X: 0.5,
+    leftfoot_Z: 0,
+    rightfoot_X: -0.5,
+    rightfoot_Z: 0,
+    overall_X:0,
+    overall_Z:5
+};
+var pose5 = {
+    head_X:-0,
+    head_Y:0,
+    head_Z: -Math.PI/9,
+    lefthand_X :-0,
+    lefthand_Z :-Math.PI/2,
+    righthand_X: -0,
+    righthand_Z: Math.PI/2,
+    leftfoot_X:0.5,
+    leftfoot_Z:0,
+    rightfoot_X:-0.5,
+    rightfoot_Z:0,
+    overall_X:0,
+    overall_Z:-5 
+};
+
+var pose6 = {
+    head_X: -0.023623972531474358,
+    head_Y: 0,
+    head_Z: 0,
+    lefthand_X: -1.1098220788679638,
+    lefthand_Z: 0,
+    righthand_X: 1.0686713141192383,
+    righthand_Z: 0,
+    leftfoot_X: -0.8,
+    leftfoot_Z: 0,
+    rightfoot_X: 0.8,
+    rightfoot_Z: 0,
+};
+
+var pose7 = {
+    head_X: 0.023623972531474358,
+    head_Y: 0,
+    head_Z: 0,
+    lefthand_X: 1.1098220788679638,
+    lefthand_Z: 0,
+    righthand_X: -1.0686713141192383,
+    righthand_Z: 0,
+    leftfoot_X: 0.8,
+    leftfoot_Z: 0,
+    rightfoot_X: -0.8,
+    rightfoot_Z: 0,
+};
+
+var keys = [{s: 0,pose: pose1}, 
+						{s: 0.125,pose: pose2},
+            {s: 0.25,pose: pose1},
+            {s: 0.375,pose: pose3},
+            {s: 0.5,pose: pose1},
+            {s: 0.625,pose: pose4}, 
+            {s: 0.75,pose: pose1},
+            {s: 0.875,pose: pose5},
+            {s: 1,pose: pose1}]; 
+            
+var keys2 = [{s: 0,pose: pose1}, 
+						{s: 0.25,pose: pose6},
+            {s: 0.5,pose: pose1},
+            {s: 0.75,pose: pose7},
+            {s: 1,pose: pose1}]; 
+
+
+init();
+animate();
+
+$("#viewpoint").click(function() {
+   viewpoint = !viewpoint;
+});
+
+$("#run").click(function() {
+	turn = !turn;
+});
+
+function init(){
+	scene = new THREE.Scene();
+  
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setClearColor(0x888888);
+  
+  document.body.appendChild(renderer.domElement);
+  window.addEventListener('resize', onWindowResize, false);
+  
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.set(0,50,200);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  
+  var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+  
+  light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(150, 100, 200);
+  scene.add(light);
+  var light3 =  new THREE.PointLight(0xffffff, 1);
+  light3.position.set(-150, -100,-200);
+  scene.add(light3);
+  
+  var light2 = new THREE.AmbientLight( 0x404040 ); // soft white light
+	scene.add( light2 );
+	//
+  THREE.ImageUtils.crossOrigin = '';
+  danboard_color = new THREE.MeshLambertMaterial({side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('http://i.imgur.com/mavAZUF.jpg')});
+  
+  //整體
+  
+	overall = new THREE.Object3D();
+ 
+  
+  //身體
+  torso = Torso();
+  torso.position.set(0,23,0);
+
+   //頭
+  head = Head();
+  head.position.set(0,15,0);
+  torso.add(head);
+  
+  //手
+  handleft = Hand();
+  handright = Hand();
+  shoulderleft = Shoulder();
+  shoulderright = Shoulder();
+  handleft.position.set(0,-7,0);                  
+  handright.position.set(0,-7,0);
+  shoulderleft.position.set(-8,2,0);
+  shoulderright.position.set(8,2,0);     
+  torso.add(shoulderleft);  
+  torso.add(shoulderright);
+  shoulderleft.add(handleft);  
+  shoulderright.add(handright);
+  shoulderleft.rotation.z = -1;
+  shoulderright.rotation.z = 1;
+  
+  //裙子
+  var apronforward =  ApronA();
+ 	torso_apronforward = new THREE.Object3D();
+  apronforward.position.set(0,-3.5,0);
+  torso_apronforward.add(apronforward);
+  torso_apronforward.position.set(0,-9.5,6);
+  torso_apronforward.rotation.x = -Math.PI/6;  		
+  torso.add(torso_apronforward);
+  var apronbehind =  ApronA();
+  torso_apronbehind = new THREE.Object3D();
+  apronbehind.position.set(0,-3.5,0);
+  torso_apronbehind.add(apronbehind);
+  torso_apronbehind.position.set(0,-9.5,-6);
+  torso_apronbehind.rotation.x = Math.PI/6;  		
+  torso.add(torso_apronbehind);
+  var apronleft =  ApronB();
+  torso_apronleft = new THREE.Object3D();
+  torso_apronleft.position.set(-6,-9.5, 0);
+  apronleft.position.y=-3.5;
+  torso_apronleft.add(apronleft);
+  torso_apronleft.rotation.z = -Math.PI/6;  		
+  torso.add(torso_apronleft);
+  var apronright =  ApronB();
+  torso_apronright = new THREE.Object3D();
+  torso_apronright.position.set(6,-9.5, 0);
+  apronright.position.y=-3.5;
+  torso_apronright.add(apronright);
+  torso_apronright.rotation.z = Math.PI/6;  		
+  torso.add(torso_apronright);
+  
+  //腳  
+  footleft = Foot();
+  torso_footleft = new THREE.Object3D();
+  torso_footleft.position.set(3, -14, 0);
+  footleft.position.y=-2.5;
+  torso_footleft.add(footleft);
+  torso.add(torso_footleft);
+  
+  footright = Foot();          
+  torso_footright = new THREE.Object3D();
+  torso_footright.position.set(-3, -14, 0);
+  footright.position.y=-2.5;
+  torso_footright.add(footright);
+  torso.add(torso_footright);
+
+	torso.position.set(-75,23,0);
+	overall.add(torso);
+  
+  scene.add(overall);
+}
+
+
+function Head(){
+	var materials = [];
+  // must give 6 materials for box geometry
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/TV3eRyI.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/IzY8ogp.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/5sS9fn7.png')}));
+  materials.push(new THREE.MeshLambertMaterial({visible:false}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/zcXoRCN.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/yasMGG3.png')}));
+  
+	var a = new THREE.Mesh(new THREE.BoxGeometry(25,16, 17),new THREE.MeshFaceMaterial(materials));
+	
+  return a;  
+}
+
+function Torso(){
+	var materials = [];
+  // must give 6 materials for box geometry
+  materials.push(danboard_color);
+  materials.push(danboard_color);
+  materials.push(danboard_color);
+  materials.push(new THREE.MeshLambertMaterial({visible:false}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/gVihBNA.png')}));
+  materials.push(new THREE.MeshLambertMaterial({side:THREE.DoubleSide,map: THREE.ImageUtils.loadTexture('http://i.imgur.com/460JhTr.png')}));
+  
+  var b = new THREE.Mesh(new THREE.BoxGeometry(12, 20, 12),
+                       new THREE.MeshFaceMaterial(materials));
+
+	return b;
+}
+
+function Hand(){
+	var c = new THREE.Mesh(new THREE.BoxGeometry(5, 14, 5),
+                       danboard_color);
+                        
+  return c;                      
+}
+
+function Foot(){
+	var d = new THREE.Mesh(new THREE.BoxGeometry(5, 13, 8),
+                       danboard_color);
+
+	return d;
+}
+
+function Shoulder(){
+	var e = new THREE.Mesh(new THREE.SphereGeometry(2.5, 32, 32),
+                       danboard_color);
+
+	return e;
+
+}
+
+function ApronA(){
+	var tmp = new THREE.Object3D();
+  var aprontmp = new THREE.Mesh(new THREE.PlaneGeometry(12, 7),
+                               danboard_color);
+  tmp.add(aprontmp);
+  
+  return tmp;
+}
+
+function ApronB(){
+	var tmp = new THREE.Object3D();
+  var aprontmp = new THREE.Mesh(new THREE.PlaneGeometry(12, 7),
+                                danboard_color);
+  tmp.rotation.y = Math.PI/2;
+  tmp.add(aprontmp);
+  
+  
+  return tmp;
+}
+
+function animate(){
+	controls.update();
+
+  
+  
+  if(viewpoint){
+			var cameraOffset = torso.localToWorld (new THREE.Vector3(0,50,-100));
+      camera.position.copy(cameraOffset);
+      camera.lookAt(torso.localToWorld (new THREE.Vector3(0,0,0)));
+     	pass = true;   
+  }
+  else if (pass){
+   	camera.position.set(0,50,150);
+  	pass = false;
+  }
+ 
+  
+  var t = clock.getElapsedTime() % period;
+  var s = t / period; // normalized time
+  
+  if(turn){
+    for (var i = keys.length - 1; i >= 0; i--) {
+      if (s > keys[i].s)
+        break;
+    }
+    // linearly interpolate between i & i+1
+    var tt = (s - keys[i].s) / (keys[i + 1].s - keys[i].s);
+    var head_X = (1 - tt) * keys[i].pose.head_X + tt * keys[i + 1].pose.head_X;
+    var head_Y = (1 - tt) * keys[i].pose.head_Y + tt * keys[i + 1].pose.head_Y;
+    var head_Z = (1 - tt) * keys[i].pose.head_Z + tt * keys[i + 1].pose.head_Z;
+
+    var lefthand_X = (1 - tt) * keys[i].pose.lefthand_X + tt * keys[i + 1].pose.lefthand_X;
+    var lefthand_Z = (1 - tt) * keys[i].pose.lefthand_Z + tt * keys[i + 1].pose.lefthand_Z;
+
+    var righthand_X = (1 - tt) * keys[i].pose.righthand_X + tt * keys[i + 1].pose.righthand_X;
+    var righthand_Z = (1 - tt) * keys[i].pose.righthand_Z + tt * keys[i + 1].pose.righthand_Z;
+
+    var leftfoot_X = (1 - tt) * keys[i].pose.leftfoot_X + tt * keys[i + 1].pose.leftfoot_X;
+    var leftfoot_Z = (1 - tt) * keys[i].pose.leftfoot_Z + tt * keys[i + 1].pose.leftfoot_Z;
+
+    var rightfoot_X = (1 - tt) * keys[i].pose.rightfoot_X + tt * keys[i + 1].pose.rightfoot_X;
+    var rightfoot_Z = (1 - tt) * keys[i].pose.rightfoot_Z + tt * keys[i + 1].pose.rightfoot_Z;
+
+    var overall_X = (1 - tt) * keys[i].pose.overall_X+ tt * keys[i + 1].pose.overall_X;
+    var overall_Z = (1 - tt) * keys[i].pose.overall_Z+ tt * keys[i + 1].pose.overall_Z;
+        
+  overall.position.x = overall_X;
+  overall.position.z = overall_Z;
+   
+  }
+	else {
+	
+  	for (var i = keys2.length - 1; i >= 0; i--) {
+      if (s > keys2[i].s)
+        break;
+    }
+    // linearly interpolate between i & i+1
+    var tt = (s - keys2[i].s) / (keys2[i + 1].s - keys2[i].s);
+    var head_X = (1 - tt) * keys2[i].pose.head_X + tt * keys2[i + 1].pose.head_X;
+    var head_Y = (1 - tt) * keys2[i].pose.head_Y + tt * keys2[i + 1].pose.head_Y;
+    var head_Z = (1 - tt) * keys2[i].pose.head_Z + tt * keys2[i + 1].pose.head_Z;
+
+    var lefthand_X = (1 - tt) * keys2[i].pose.lefthand_X + tt * keys2[i + 1].pose.lefthand_X;
+    var lefthand_Z = (1 - tt) * keys2[i].pose.lefthand_Z + tt * keys2[i + 1].pose.lefthand_Z;
+
+    var righthand_X = (1 - tt) * keys2[i].pose.righthand_X + tt * keys2[i + 1].pose.righthand_X;
+    var righthand_Z = (1 - tt) * keys2[i].pose.righthand_Z + tt * keys2[i + 1].pose.righthand_Z;
+
+    var leftfoot_X = (1 - tt) * keys2[i].pose.leftfoot_X + tt * keys2[i + 1].pose.leftfoot_X;
+    var leftfoot_Z = (1 - tt) * keys2[i].pose.leftfoot_Z + tt * keys2[i + 1].pose.leftfoot_Z;
+
+    var rightfoot_X = (1 - tt) * keys2[i].pose.rightfoot_X + tt * keys2[i + 1].pose.rightfoot_X;
+    var rightfoot_Z = (1 - tt) * keys2[i].pose.rightfoot_Z + tt * keys2[i + 1].pose.rightfoot_Z;
+
+    var overall_X = (1 - tt) * keys2[i].pose.overall_X+ tt * keys2[i + 1].pose.overall_X;
+    var overall_Z = (1 - tt) * keys2[i].pose.overall_Z+ tt * keys2[i + 1].pose.overall_Z;
+
+		overall.rotation.y = angle;
+    angle+=0.01;
+
+  }
+  
+  head.rotation.x = head_X;
+  head.rotation.y = head_Y;
+  head.rotation.z = head_Z;
+
+  shoulderleft.rotation.x = lefthand_X;
+  shoulderleft.rotation.z = lefthand_Z;
+
+  shoulderright.rotation.x = righthand_X;
+  shoulderright.rotation.z = righthand_Z;
+
+  torso_footleft.rotation.x = leftfoot_X;
+  torso_footleft.rotation.z = leftfoot_Z;
+
+  torso_footright.rotation.x = rightfoot_X ;
+  torso_footright.rotation.z = rightfoot_Z ;
+
+
+  
+
+  
+ 	
+  
+	requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+  
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+
+</script>
+
+</body>
+
+</html>
