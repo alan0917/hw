@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+body {
+    overflow: hidden;
+}
+
+</style>
+</head>
+
+<body> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.js"></script>
+<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/OrbitControls.js"></script>
+<script>
+var scene, renderer, camera;
+var controls;
+
+
+init();
+animate();
+
+function init() {
+	scene = new THREE.Scene();
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x999999);
+  document.body.appendChild(renderer.domElement);
+
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.set(0,50,150);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  
+  var gridXZ = new THREE.GridHelper(100, 10);
+  gridXZ.setColors(new THREE.Color(0xff0000), new THREE.Color(0xffffff));
+  scene.add(gridXZ);
+  window.addEventListener('resize', onWindowResize, false);
+
+  train();
+}
+
+function train(){
+
+	var total = new THREE.Object3D();
+  
+  var A  = new THREE.Mesh( new THREE.BoxGeometry( 12, 10, 30 ), new THREE.MeshBasicMaterial( {color: 0x00bfff } ) );
+  A.position.set(0, 5, 0);
+  total.add( A );
+	
+  var B =  new THREE.Mesh( new THREE.CylinderGeometry(5, 5, 12.1, 64, 64, false, 0, Math.PI), new THREE.MeshBasicMaterial( {color: 0x00afff } ) );
+  B.rotation.z = Math.PI/2;
+  B.position.set(0, 0, 14);
+  total.add( B );
+  
+  var C = new THREE.Mesh( new THREE.CylinderGeometry(4, 4, 18, 64, 64), new THREE.MeshBasicMaterial( {color: 0x00bfff } ));
+  C.rotation.x = Math.PI/2;
+  C.position.set(0, 10, 6);
+  total.add( C );
+  
+  var D = new THREE.Mesh( new THREE.CylinderGeometry(4, 4, 4, 64, 64), new THREE.MeshBasicMaterial( {color: 0x000000 } ));
+  D.rotation.x = Math.PI/2;
+  D.position.set(0, 10, 17);
+  total.add( D );
+  
+  THREE.ImageUtils.crossOrigin = '';
+  
+  var E = new THREE.Mesh(new THREE.CircleGeometry(4.2,32),new THREE.MeshBasicMaterial({map: THREE.ImageUtils.loadTexture('http://i.imgur.com/P3zuCjc.png'),transparent: true}));
+  E.position.set(0,10,19.1);                        
+  total.add(E);
+  
+  var F = new THREE.Mesh( new THREE.CylinderGeometry(0.8, 0.8, 7.5, 64, 64), new THREE.MeshBasicMaterial( {color: 0x000000 } ));
+  F.position.set(0, 13, 16.5);
+  total.add( F );
+  
+  var G = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.5, 64, 64), new THREE.MeshBasicMaterial( {color: 0x000000 } ));
+  G.position.set(0, 16, 16.5);
+  total.add( G );
+
+	var H = new THREE.Mesh(new THREE.BoxGeometry( 3, 3, 3 ), new THREE.MeshBasicMaterial( {color: 0x000000 } ) );
+	H.position.set(0, 5, 17);
+  total.add( H );
+  
+  var I = new THREE.Mesh( new THREE.CylinderGeometry(4.3, 4.3, 0.2, 64, 64, false, Math.PI/2, Math.PI), new THREE.MeshBasicMaterial( {color: 0xff0000 } ));
+  I.rotation.x = Math.PI/2;
+  I.position.set(0, 10, 15);
+  total.add( I );
+  
+  var J = I.clone();
+  J.position.set(0, 10, 12.5);
+  total.add( J );
+  
+  var K = I.clone();
+  K.position.set(0, 10, 10);
+  total.add( K );
+  
+  var L = I.clone();
+  L.position.set(0, 10, 7.5);
+  total.add( L );
+  
+  var M = I.clone();
+  M.position.set(0, 10, 5);
+  total.add( M );
+  
+  var N = I.clone();
+  N.position.set(0, 10, 2.5);
+  total.add( N );
+  
+  var O = new THREE.Mesh(new THREE.BoxGeometry( 12, 15, 12 ), new THREE.MeshBasicMaterial( {color: 0x00bfff } ) );
+  O.position.set(0,10,-3.5);
+  total.add( O );
+ 
+  var P = new THREE.Mesh(new THREE.CylinderGeometry( 10, 10, 11.9, 64,64,false,2.5,Math.PI/2.4 ),new THREE.MeshBasicMaterial( {color: 0x00bfff } ) );
+  P.position.set(-0,9.5,-3.5);
+  P.rotation.x = Math.PI/2;
+  total.add( P );
+  
+  var Q = new THREE.Mesh(new THREE.CylinderGeometry( 10.5, 10.5, 11.8, 64,64,false,2.49,Math.PI/2.39 ),new THREE.MeshBasicMaterial( {color: 0x000000 } ) );
+  Q.position.set(-0,9.5,-3.5);
+  Q.rotation.x = Math.PI/2;
+  total.add( Q );
+  
+  var curve = new THREE.SplineCurve( [
+    new THREE.Vector2( 14, 0 ),
+    new THREE.Vector2( 14, -3 ),
+    new THREE.Vector2( 8, -3 ),
+    new THREE.Vector2( 8, -8 ),
+    new THREE.Vector2( -3, -8 ),
+    new THREE.Vector2( -3, 0 )
+  ] );
+  var path = new THREE.Path( curve.getPoints( 5 ) );
+  
+  var R = new THREE.Line( path.createPointsGeometry( 5 ), new THREE.LineBasicMaterial( { color : 0xff0000 } ) );
+  R.rotation.y = -Math.PI/2;
+  R.position.set(-6.05,9,0);
+  total.add(R);
+  
+  var S = R.clone();
+  S.position.set(6.05,9,0);
+  total.add(S);
+  
+  curve = new THREE.SplineCurve( [
+    new THREE.Vector2( 4, 4 ),
+    new THREE.Vector2( 4, -4 ),
+    new THREE.Vector2( -4, -4 ),
+    new THREE.Vector2( -4, 4 )
+  ] );
+	
+  var path = new THREE.Path( curve.getPoints( 3 ) );
+  
+  var T = new THREE.Line( path.createPointsGeometry( 3 ), new THREE.LineBasicMaterial( { color : 0xff0000 } ) );
+  T.rotation.y = -Math.PI/2;
+  T.position.set(-6.05,5,-10);
+  total.add(T);
+   
+ 	var U = T.clone();
+  U.position.set(6.05,5,-10);
+  total.add(U);
+  
+  var V = new THREE.Mesh( new THREE.BoxGeometry( 1, 7, 6 ), new THREE.LineBasicMaterial( {color: 0x00b1ff } ) );
+  V.position.set(5.4,10,-11.9);
+  total.add(V);
+  
+  var W = V.clone();
+  W.position.set(-5.4,10,-11.9);
+  total.add(W);
+  
+  var X = new THREE.Mesh( new THREE.BoxGeometry( 11.8, 7, 1 ), new THREE.LineBasicMaterial( {color: 0x00b1ff } ) );
+  X.position.set(0,10,-14.4);
+  total.add(X);
+  
+  var Y  = new THREE.Mesh( new THREE.BoxGeometry( 14, 1, 38 ), new THREE.LineBasicMaterial( {color: 0xff0000 } ) );
+  Y.position.set(0,0,3);
+  total.add(Y);
+  
+  var Z = new THREE.Mesh(new THREE.CylinderGeometry( 3, 3, 1, 64, 64 ),new THREE.MeshBasicMaterial( {color: 0x000000 } ) );
+  Z.rotation.z = Math.PI/2;
+  Z.position.set(-4,-3,13);
+  total.add(Z);
+  
+  var AA = Z.clone();
+	AA.rotation.z = Math.PI/2;
+  AA.position.set(4,-3,13);
+  total.add(AA);
+  
+  var AB = Z.clone();
+  AB.rotation.z = Math.PI/2;
+  AB.position.set(-4,-3,7);
+  total.add(AB);
+  
+  var AC = Z.clone();
+  AC.rotation.z = Math.PI/2;
+  AC.position.set(4,-3,7);
+  total.add(AC);
+  
+  var AD = Z.clone();
+  AD.rotation.z = Math.PI/2;
+  AD.position.set(-4,-3,0);
+  total.add(AD);
+  
+  var AE = Z.clone();
+	AE.rotation.z = Math.PI/2;
+  AE.position.set(4,-3,0);
+  total.add(AE);
+  
+  var AF =  new THREE.Mesh( new THREE.CylinderGeometry( 90, 90, 1, 64,64,true ), new THREE.MeshBasicMaterial( {color: 0x000000, side:THREE.DoubleSide })); 
+  AF.position.set(0,0.5,0);
+	scene.add( AF );
+  
+  var AG = new THREE.Mesh( new THREE.CylinderGeometry( 82, 82, 1, 64,64,true ), new THREE.MeshBasicMaterial( {color: 0x000000, side:THREE.DoubleSide })); 
+  AG.position.set(0,0.5,0);
+	scene.add( AG );
+  
+  train = new THREE.Object3D();
+  scene.add(train);
+  
+  total.position.set(86,5,0);
+  train.add(total); 
+}
+
+function onWindowResize() {
+
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+function animate() {
+  controls.update();
+
+	train.rotation.y -= 0.01;
+  
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
+  
+}
+
+</script>
+</body>
+
+</html>
