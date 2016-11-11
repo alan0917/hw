@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ff00ff
+}
+
+body {
+  overflow: hidden;
+}
+
+
+</style>
+</head>
+
+<body>
+<div id="info">GameProgramming HW3 Demo
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+<audio id="BGM" autoplay loop style="display:none">
+<source src="http://alan0917.github.io/hw/sounds/The Truth That You Leave.mp3" type='audio/mp3'>
+</audio>
+<audio id="SE" style="display:none">
+<source src="http://alan0917.github.io/hw/sounds/彈簧聲.wav" type='audio/wav'>
+</audio>
+	
+<script>
+var camera, scene, renderer;
+var satellite, angle = 0;
+var mousePoint;
+var mouse = new THREE.Vector2();
+//var stats;
+var pos, vel, force;
+var clock = new THREE.Clock();
+var keyboard = new KeyboardState();
+var ball;
+var planeP = new THREE.Vector3(10, 0, 0);
+var planeN = new THREE.Vector3(0, 1, 0);
+var JUMP = true, JUMP2 = true;
+var ballR = 3;
+var  soundVal = 1.0, sign = 1.0;
+var BGM, SE;
+var stArray = [], baseS = 0, counter =  0;
+var ground  = new Array();
+
+init();
+animate();
+
+function setUpStArray() {
+  for (var i = 0; i < 3; i++) {
+    var row = [];
+    for (var j = 0; j < 9; j++)
+      row.push(new THREE.Vector2(j * 0.125, 1 - 0.5 * i));
+    stArray.push(row);
+  }
+}
+
+var Ground = function(mesh,width,height,pos){
+	this.mesh = mesh;
+  this.width = width;
+  this.height = height;
+  this.pos = pos;
+  
+ 	this.mesh.geometry.computeFaceNormals();
+  this.normal = new THREE.Vector3(0,1,0).normalize();
+}
+
+
+function init() {
+	SE = document.getElementById ('SE');
+  BGM = document.getElementById ('BGM');
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+  
+  pos = new THREE.Vector3(-20, 40, 1);
+  vel = new THREE.Vector3(5, 0, 0);
+  //force = new THREE.Vector3(0, -90, 0);
+
+
+  /*
+    // STATS
+  	stats = new Stats();
+  	stats.domElement.style.position = 'absolute';
+  	stats.domElement.style.top = '0px';
+  	stats.domElement.style.zIndex = 100;
+  	document.body.appendChild( stats.domElement );	
+  */
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+  document.body.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-50, 50, 60, -10, -10, 100);
+  camera.position.z = 0;
+  scene.add(camera);
+  
+  THREE.ImageUtils.crossOrigin = '';
+	var texture = THREE.ImageUtils.loadTexture('http://i.imgur.com/qNL5upu.png');
+	for (var i = 0; i < 5; i++){
+	var background = new THREE.Mesh (new THREE.PlaneGeometry (150,80), new THREE.MeshBasicMaterial({map:texture}));
+  background.position.y = 25.8;
+  background.position.x = i*150;
+  scene.add (background);
+  }
+
+  // what's in the scene? [depth]
+  // bordere (blue lines) [0]
+  // satellite (white circle) [1]
+  // mousePoint (red circle) [2]
+  // background (dark yellow quad) [3]
+  //
+  // all on XY plane: rely on polygonOffset to sort things out
+  // line object remains at frontmost
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
+
+	setUpStArray();
+  
+  // loading texture from imgur.com
+  texture = THREE.ImageUtils.loadTexture('http://i.imgur.com/NvuXHcL.png');
+  texture.wrapS = THREE.RepeatWrapping;
+  
+  // setting up texMat
+  var texMat = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,  // cutout texture: set transparent: true
+    side: THREE.DoubleSide
+  });
+
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(
+    new THREE.Vector3(-15, -15, 0),
+    new THREE.Vector3(15, -15, 0),
+    new THREE.Vector3(15, 15, 0),
+    new THREE.Vector3(-15, 15, 0)
+  );
+
+  var face;
+  face = new THREE.Face3(0, 1, 2);
+  geometry.faces.push(face);
+  face = new THREE.Face3(0, 2, 3);
+  geometry.faces.push(face);
+
+  geometry.faceVertexUvs[0].push([stArray[1][0], stArray[1][1], stArray[0][1]]);
+  geometry.faceVertexUvs[0].push([stArray[1][0], stArray[0][1], stArray[0][0]]);
+
+  geometry.computeBoundingSphere();
+  geometry.computeFaceNormals();
+  geometry.computeVertexNormals();
+
+  sprite = new THREE.Mesh(geometry, texMat);
+  sprite.scale.set (0.5,0.5,0.5);  
+  scene.add(sprite);
+  /////////////////////////////////////////////////////////////
+  
+  
+  texture = THREE.ImageUtils.loadTexture('http://i.imgur.com/507M0PP.png');
+  
+  var ground0 = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), new THREE.MeshBasicMaterial({
+    color: 0xFCFCFC,
+    //visible:false,
+    map : texture,
+    transparent:true
+  }));
+  
+  
+  
+  posy = [10,10,5,20,20,15,15,10,20,10];
+  for(i = 0; i < 10 ;i++){
+  	ground[i] = ground0.clone();
+    ground[i].position.y = posy[i];
+    ground[i].position.x = i * 20;
+    scene.add(ground[i]);
+  }
+
+
+  window.addEventListener('resize', onWindowResize, false);
+  //  window.addEventListener('mousedown', onDocumentMouseDown, false);
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function spriteAnimate() {
+  var geometry = sprite.geometry;
+  var st0 = stArray[1][baseS];
+  var st1 = stArray[1][baseS + 1];
+  var st2 = stArray[0][baseS + 1];
+  var st3 = stArray[0][baseS];
+
+  geometry.faceVertexUvs[0] = [];
+  geometry.faceVertexUvs[0].push([st0, st1, st2]);
+  geometry.faceVertexUvs[0].push([st0, st2, st3]);
+  geometry.uvsNeedUpdate = true;
+
+  baseS = (baseS + 1) % 8;
+}
+
+function animate() {
+  
+  var dt = clock.getDelta();
+  keyboard.update();
+  
+  
+  
+  if (keyboard.pressed ('right')) {
+
+      if(vel.x < 30)
+        vel.x+=1;
+  }
+  if (keyboard.pressed ('left')) { 
+
+      if(vel.x > -30)
+          vel.x-=1;
+  }
+  if (keyboard.down ('up')) {
+		if(JUMP){
+    	SE.play();
+    	vel.y += 50;
+      JUMP = false;
+      JUMP2 = true;
+		}
+    else if(JUMP2){
+    	SE.play();
+    	vel.y += 50;
+      JUMP = false;
+      JUMP2 = false;
+    }
+    if(vel.y>50)
+    	vel.y =50;
+  }
+  if(vel.x > 0)
+   sprite.rotation.y = Math.PI*2;
+  else
+  	sprite.rotation.y = Math.PI;
+  
+  
+  // force: add gravity first
+  force = new THREE.Vector3(0, -90, 0);
+	if (pos.y <= 0) {    // if contact, add contact force  
+    if(vel.x != 0){
+    	force.add(new THREE.Vector3(-vel.x*0.8, 90, 0));
+    }
+    else{
+    	vel.x = 0;
+      force.add(new THREE.Vector3(0, 90, 0));
+    }
+	}  
+  
+  // then do Euler's
+  
+  
+
+	
+  
+  if (pos.x <= -45 + ballR) {
+    pos.x = -45 + ballR;
+    vel.x *= -.5;
+  }
+  if (pos.x >= 445 - ballR) {
+    pos.x = 445 - ballR;
+    vel.x *= -.5;
+  }
+  
+	if (pos.y <= 0) {
+  	JUMP = true;
+    JUMP2 = true;
+    pos.y = 0.3
+    vel.y *= -.3;
+  }
+  
+  for (i =0 ;i < 10; i++){ 
+    if(vel.y < 0){
+        if( pos.x > ground[i].position.x-10	&& pos.x < ground[i].position.x + 10 && pos.y > ground[i].position.y + 6 &&  pos.y < ground[i].position.y + 6.5 ){
+      		pos.y = ground[i].position.y + 6.5;
+          vel.y = -0.1;
+          force.add(new THREE.Vector3(0, 91, 0)); 
+          JUMP = true;
+    			JUMP2 = true;
+        }       
+    }    
+  }
+  
+  vel.add(force.clone().multiplyScalar(dt));
+  pos.add(vel.clone().multiplyScalar(dt));
+  
+	sprite.position.copy(pos);
+  
+  camera.position.x = pos.x ;
+  if(camera.position.x >= 400)
+  	camera.position.x = 400;
+  else if(camera.position.x<=0){
+  	camera.position.x = 0;	
+  }
+   
+  
+	counter++ ;
+  if (counter % 10 === 0)	//小 -> 快
+    spriteAnimate();
+
+  requestAnimationFrame(animate);
+  render();
+}
+
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+
+</script>
+</body>
+
+</html>
