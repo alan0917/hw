@@ -35,8 +35,8 @@ body {
 <script src="//cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.min.js"></script>
 
 <script>
-	var scene, renderer, camera;
-var controls;
+var scene, renderer, camera;
+
 var keyboard = new KeyboardState();
 var clock = new THREE.Clock();
 var clock2 = new THREE.Clock();
@@ -131,7 +131,7 @@ var keys = [{s: 0,pose: pose1},
 
 function init() {
 	modeling();
-  window.addEventListener('resize', onWindowResize, false);
+ window.addEventListener('resize', onWindowResize, false);
   document.body.appendChild(renderer.domElement);
 }
 
@@ -151,7 +151,7 @@ function modeling(){
   camera.position.set(-40,75, -750);
 
 
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  
 
   //光線
 	light = new THREE.PointLight(0xffffff);
@@ -268,7 +268,7 @@ function modeling(){
   materialmount2 = new THREE.MeshLambertMaterial({
     color: 0x796400,
     side: THREE.DoubleSide,
-    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg
+    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg')
   });
   mount2 = new THREE.Mesh(geometrymount2, materialmount2);
   mount2.position.set(0, 0, -184);
@@ -391,7 +391,7 @@ function modeling(){
  	//一壘準備區
   
   base1preparation = new THREE.Mesh( new THREE.PlaneGeometry(200,1020),  new THREE.MeshLambertMaterial( {color: 0x796400,
-    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg
+    side: THREE.DoubleSide,    map:THREE.ImageUtils.loadTexture('https://i.imgur.com/guh5eKy.jpg')}));
   base1preparation.position.set(240, 0.05, -265);
   base1preparation.rotation.x = -Math.PI/2;
   infield.add(base1preparation);
@@ -614,7 +614,7 @@ function orientOmegaArrow() {
 
 function animate() {
   
-  controls.update();
+  //controls.update();
   var baseballposi  =baseball.localToWorld(new THREE.Vector3(0, 0, 0))
   
  	if(turn) {
@@ -816,7 +816,6 @@ function render() {
 
   
 }
-
 </script>
 </body>
 
