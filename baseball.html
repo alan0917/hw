@@ -454,12 +454,12 @@ function modeling(){
   scene.add( outfieldwall );
  
   //本壘後方
-  homebasebackward =  new THREE.Mesh( new THREE.CylinderGeometry( 350, 350, 20, 64, 9, true, -0.55, Math.PI/2.85 ), new THREE.MeshBasicMaterial({
+  homebasebackward =  new THREE.Mesh( new THREE.CylinderGeometry( 350, 350, 10, 64, 9, true, -0.55, Math.PI/2.85 ), new THREE.MeshBasicMaterial({
   	color: 0xCCCCCC,
     side: THREE.DoubleSide,
      map: THREE.ImageUtils.loadTexture('https://i.imgur.com/Ta41OXk.jpg')
   }) );
-  homebasebackward.position.set( 0, 10, -200);
+  homebasebackward.position.set( 0, 5, -200);
   scene.add(homebasebackward);
   
   homebasebackward2 =  new THREE.Mesh( new THREE.CylinderGeometry( 350, 350, 100, 64, 9, true, -0.55, Math.PI/2.85 ), new THREE.MeshBasicMaterial({
@@ -467,36 +467,36 @@ function modeling(){
     side: THREE.DoubleSide,
      map: THREE.ImageUtils.loadTexture('https://i.imgur.com/fihD9tq.png')
   }) );
-  homebasebackward2.position.set( 0, 70, -200);
+  homebasebackward2.position.set( 0, 60, -200);
   scene.add(homebasebackward2);
   
   //柱子
-  pillar =  new THREE.Mesh( new THREE.CylinderGeometry(5, 5, 130, 64), new THREE.MeshBasicMaterial({
+  pillar =  new THREE.Mesh( new THREE.CylinderGeometry(5, 5, 120, 64), new THREE.MeshBasicMaterial({
    color:0x000000
   }));
   
-  pillar.position.set(185, 65, 95);
+  pillar.position.set(185, 60, 95);
   scene.add(pillar);
   
   pillar2 = pillar.clone();
-  pillar2.position.set(-185, 65, 95);
+  pillar2.position.set(-185, 60, 95);
   scene.add(pillar2);
   
   pillar3 = pillar.clone();
-  pillar3.position.set(760, 65, -480);
+  pillar3.position.set(760, 60, -480);
   scene.add(pillar3);
   
   pillar4 = pillar.clone();
-  pillar4.position.set(-760, 65, -480);
+  pillar4.position.set(-760, 60, -480);
   scene.add(pillar4);
   
   //一壘牆
-  base1wall = new THREE.Mesh( new THREE.PlaneGeometry(820,20 ), new THREE.MeshBasicMaterial({
+  base1wall = new THREE.Mesh( new THREE.PlaneGeometry(820,10 ), new THREE.MeshBasicMaterial({
   color: 0xCCCCCC,
     side: THREE.DoubleSide
   }));
   base1wall.rotation.y = Math.PI/2;
-  base1wall.position.set(335, 10, -330);
+  base1wall.position.set(335, 5, -330);
   infield.add(base1wall);
   
   base1wall2 = new THREE.Mesh( new THREE.PlaneGeometry(810,100 ), new THREE.MeshBasicMaterial({
@@ -505,16 +505,16 @@ function modeling(){
     map: THREE.ImageUtils.loadTexture('https://i.imgur.com/fihD9tq.png')
   }));
   base1wall2.rotation.y = Math.PI/2;
-  base1wall2.position.set(335, 70, -330);
+  base1wall2.position.set(335, 60, -330);
   infield.add(base1wall2);
   
   
   //三壘牆
-  base3wall = new THREE.Mesh( new THREE.PlaneGeometry(820,20 ),new THREE.MeshBasicMaterial({ 
+  base3wall = new THREE.Mesh( new THREE.PlaneGeometry(820,10 ),new THREE.MeshBasicMaterial({ 
   color: 0xCCCCCC,
     side: THREE.DoubleSide
   })); 
-  base3wall.position.set( -330, 10, 335);
+  base3wall.position.set( -330, 5, 335);
   infield.add(base3wall);
   
    base3wall2 = new THREE.Mesh( new THREE.PlaneGeometry(810,100 ), new THREE.MeshBasicMaterial({
@@ -522,7 +522,7 @@ function modeling(){
     side: THREE.DoubleSide,
     map: THREE.ImageUtils.loadTexture('https://i.imgur.com/fihD9tq.png')
   }));
-  base3wall2.position.set( -330, 70, 335);
+  base3wall2.position.set( -330, 60, 335);
   infield.add(base3wall2);
   	
   
